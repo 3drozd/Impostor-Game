@@ -1,0 +1,1707 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gra Impostor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #333;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+            min-height: 600px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            transition: min-height 0.5s ease, box-shadow 0.5s ease;
+            position: relative;
+        }
+
+        .container.changing {
+            min-height: 550px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .container.expanded {
+            min-height: 750px;
+            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.15);
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .section {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .deck-selection {
+            display: flex;
+            gap: 35px;
+            margin: 20px 0;
+            overflow-x: auto;
+            padding: 40px 50px;
+            align-items: center;
+            perspective: 1200px;
+            position: relative;
+        }
+
+        .deck-selection::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 20px;
+            background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.15) 0%, transparent 70%);
+            z-index: 1;
+        }
+
+        .deck-selection::-webkit-scrollbar {
+            display: none;
+        }
+
+        .deck-selection {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .deck-card {
+            background: linear-gradient(135deg, #636e72 0%, #2d3436 100%);
+            border: none;
+            border-radius: 15px;
+            padding: 0;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+                        background 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+                        border 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+                        box-shadow 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            font-size: 16px;
+            font-weight: bold;
+            width: 308px;
+            height: 450px;
+            flex-shrink: 0;
+            overflow: visible;
+            display: flex;
+            flex-direction: column;
+            transform: translateZ(0) scale(1);
+            backface-visibility: hidden;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
+            will-change: transform;
+            position: relative;
+            z-index: 2;
+        }
+
+        .deck-card:hover:not(.selected) {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .deck-card.selected {
+            background: linear-gradient(135deg, #4a90e2 0%, #2e5cb8 100%);
+            transform: scale(1.05) translateY(-3px);
+            color: #ffffff;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+            border: 3px solid #2e5cb8;
+            position: relative;
+            z-index: 5;
+            transform-origin: center center;
+            will-change: transform;
+            box-shadow: 0 12px 30px rgba(74, 144, 226, 0.3),
+                        0 20px 40px rgba(100, 100, 100, 0.4),
+                        0 30px 70px rgba(80, 80, 80, 0.2);
+            animation: pulse-select 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            animation-fill-mode: forwards;
+        }
+
+        .deck-card.selected .deck-content {
+            border-color: #2e5cb8;
+            background: linear-gradient(135deg, #6bb6ff 0%, #4a90e2 100%);
+            color: #ffffff;
+        }
+
+        @keyframes pulse-select {
+            0% {
+                transform: scale(1) translateY(0px);
+                box-shadow: 0 8px 20px rgba(74, 144, 226, 0.1),
+                            0 15px 30px rgba(100, 100, 100, 0.2),
+                            0 25px 50px rgba(80, 80, 80, 0.1);
+            }
+            40% {
+                transform: scale(1.08) translateY(-5px);
+                box-shadow: 0 16px 40px rgba(74, 144, 226, 0.4),
+                            0 25px 50px rgba(100, 100, 100, 0.5),
+                            0 35px 80px rgba(80, 80, 80, 0.3);
+            }
+            80% {
+                transform: scale(1.045) translateY(-2.8px);
+                box-shadow: 0 11.5px 29px rgba(74, 144, 226, 0.28),
+                            0 22px 45px rgba(100, 100, 100, 0.42),
+                            0 32px 72px rgba(80, 80, 80, 0.22);
+            }
+            100% {
+                transform: scale(1.05) translateY(-3px);
+                box-shadow: 0 12px 30px rgba(74, 144, 226, 0.3),
+                            0 20px 40px rgba(100, 100, 100, 0.4),
+                            0 30px 70px rgba(80, 80, 80, 0.2);
+            }
+        }
+
+        .deck-card.selected::after {
+            content: "Wybrano";
+            position: absolute;
+            top: -12px;
+            right: -12px;
+            background: #ffffff;
+            color: #2e5cb8;
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: bold;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            z-index: 10;
+            white-space: nowrap;
+        }
+
+        .deck-content {
+            padding: 10px;
+            height: 65px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            justify-content: center;
+            transform: translateZ(0);
+            backface-visibility: hidden;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
+            border: 3px solid #bbb;
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+        }
+
+        .deck-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 3px;
+            transform: translateZ(0);
+            backface-visibility: hidden;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
+        }
+
+        .deck-image-png {
+            width: 100%;
+            height: 385px;
+            object-fit: cover;
+            object-position: center;
+            background: rgba(255, 255, 255, 0.1);
+            image-rendering: auto;
+            transform: translateZ(0);
+            backface-visibility: hidden;
+            transition: none;
+        }
+
+        .form-group {
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #5a67d8;
+        }
+
+        .players-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease, transform 0.5s ease;
+            margin: 10px;
+        }
+
+        .game-action-button {
+            background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            position: absolute !important;
+            bottom: 60px !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+            z-index: 1000 !important;
+            transition: none !important;
+            animation: none !important;
+            margin: 0 !important;
+        }
+
+        .game-action-button * {
+            transition: none !important;
+            animation: none !important;
+        }
+
+        #game-section:not(.active) #game-action-btn {
+            visibility: hidden;
+        }
+
+        #game-action-btn.hidden {
+            visibility: hidden;
+        }
+
+        .game-action-button:hover {
+            transform: translateX(-50%) translateY(-2px) !important;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .game-info {
+            background: linear-gradient(135deg, #5a67d8 0%, #4c63d2 100%);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            border: 3px solid #2e5cb8;
+            box-shadow: 0 4px 15px rgba(90, 103, 216, 0.3);
+        }
+
+        .password-reveal {
+            background: linear-gradient(135deg, #6c5ce7 0%, #5a4fcf 100%);
+            border-radius: 15px;
+            padding: 40px;
+            margin: 20px 0;
+            font-size: 20px;
+            color: white;
+            opacity: 0;
+            transition: all 0.5s ease;
+            position: absolute;
+            left: 50%;
+            width: calc(100% - 80px);
+            transform: translateX(-50%) translateY(-80px);
+            z-index: 5;
+        }
+
+        .password-reveal.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+
+
+        .impostor-reveal {
+            padding: 40px;
+            margin: 20px 0;
+            font-size: 24px;
+            font-weight: bold;
+            color: #d63384;
+        }
+
+        .round-info {
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+            border-radius: 15px;
+            padding: 15px 25px;
+            margin: 20px auto;
+            font-size: 18px;
+            color: white;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .direction-arrow {
+            font-size: 30px;
+            margin: 0 10px;
+        }
+
+        .error {
+            color: #e53e3e;
+            background: #fed7d7;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        .theme-buttons {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .theme-btn {
+            padding: 10px 15px;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            background: #fff;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .theme-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .theme-btn.active {
+            background: #5a67d8;
+            color: white;
+            border-color: #5a67d8;
+        }
+
+        .dark-theme {
+            background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%);
+        }
+
+        .dark-theme .container {
+            background: #101525;
+            color: #ecf0f1;
+            border: 1px solid #34495e;
+        }
+
+        .dark-theme .theme-btn {
+            background: #34495e;
+            color: #ecf0f1;
+            border-color: #5a6c7d;
+        }
+
+        .dark-theme .theme-btn.active {
+            background: #a29bfe;
+            color: #34495e;
+            border-color: #a29bfe;
+        }
+
+        /* Jasny motyw - efekt 3D */
+        .deck-card {
+            background: linear-gradient(145deg, #f8f9fa 0%, #e9ecef 30%, #dee2e6 70%, #ced4da 100%);
+            color: #1a1a1a;
+            border: 2px solid #ffffff;
+            box-shadow: 0 15px 35px rgba(206, 212, 218, 0.3),
+                        0 5px 15px rgba(0, 0, 0, 0.1),
+                        0 25px 50px rgba(100, 100, 100, 0.4),
+                        0 35px 80px rgba(80, 80, 80, 0.2),
+                        inset 0 2px 0 rgba(255, 255, 255, 0.8),
+                        inset 0 -2px 0 rgba(206, 212, 218, 0.3),
+                        inset 2px 0 0 rgba(255, 255, 255, 0.4),
+                        inset -2px 0 0 rgba(206, 212, 218, 0.2);
+        }
+
+        .deck-card:hover:not(.selected) {
+            transform: perspective(1000px) rotateY(1deg) rotateX(1deg) translateY(-8px);
+            box-shadow: 0 20px 45px rgba(206, 212, 218, 0.4),
+                        0 8px 20px rgba(0, 0, 0, 0.15),
+                        0 30px 60px rgba(100, 100, 100, 0.6),
+                        0 40px 100px rgba(80, 80, 80, 0.4),
+                        inset 0 2px 0 rgba(255, 255, 255, 0.9),
+                        inset 0 -2px 0 rgba(206, 212, 218, 0.4),
+                        inset 2px 0 0 rgba(255, 255, 255, 0.5),
+                        inset -2px 0 0 rgba(206, 212, 218, 0.3);
+        }
+
+        /* Ciemny motyw - efekt 3D */
+        .dark-theme .deck-card {
+            background: linear-gradient(145deg, #1a2744 0%, #243555 30%, #2d4066 70%, #364a77 100%);
+            color: white;
+            border: 2px solid #1e3c78;
+            box-shadow: 0 15px 35px rgba(26, 39, 68, 0.5),
+                        0 5px 15px rgba(0, 0, 0, 0.3),
+                        0 20px 40px rgba(54, 74, 119, 0.4),
+                        0 30px 70px rgba(54, 74, 119, 0.2),
+                        inset 0 2px 0 rgba(255, 255, 255, 0.1),
+                        inset 0 -2px 0 rgba(0, 0, 0, 0.3),
+                        inset 2px 0 0 rgba(255, 255, 255, 0.05),
+                        inset -2px 0 0 rgba(0, 0, 0, 0.2);
+        }
+
+        .dark-theme .deck-card:hover:not(.selected) {
+            transform: perspective(1000px) rotateY(1deg) rotateX(1deg) translateY(-8px);
+            box-shadow: 0 20px 45px rgba(26, 39, 68, 0.6),
+                        0 8px 20px rgba(0, 0, 0, 0.4),
+                        0 25px 50px rgba(54, 74, 119, 0.6),
+                        0 35px 90px rgba(54, 74, 119, 0.4),
+                        inset 0 2px 0 rgba(255, 255, 255, 0.15),
+                        inset 0 -2px 0 rgba(0, 0, 0, 0.4),
+                        inset 2px 0 0 rgba(255, 255, 255, 0.08),
+                        inset -2px 0 0 rgba(0, 0, 0, 0.25);
+        }
+
+        .dark-theme .deck-card.selected {
+            background: linear-gradient(145deg, #5a4fcf 0%, #6c5ce7 30%, #7b6ef6 70%, #8a80ff 100%);
+            color: white;
+            border: 2px solid #4c3bbc;
+            box-shadow: 0 18px 40px rgba(108, 92, 231, 0.5),
+                        0 8px 20px rgba(0, 0, 0, 0.2),
+                        inset 0 2px 0 rgba(255, 255, 255, 0.3),
+                        inset 0 -2px 0 rgba(90, 79, 207, 0.4),
+                        inset 2px 0 0 rgba(255, 255, 255, 0.2),
+                        inset -2px 0 0 rgba(90, 79, 207, 0.3);
+            transform: scale(1.05) translateY(-3px);
+        }
+
+        .dark-theme input, .dark-theme select {
+            background: #34495e;
+            color: #ecf0f1;
+            border-color: #5a6c7d;
+        }
+
+        .dark-theme input:focus, .dark-theme select:focus {
+            border-color: #a29bfe;
+        }
+
+        .dark-theme #selected-count {
+            color: #bbb !important;
+        }
+
+        .dark-theme .deck-selection::before {
+            background: radial-gradient(ellipse at center, rgba(30, 60, 120, 0.4) 0%, transparent 70%);
+        }
+
+        .dark-theme .deck-content {
+            border-color: #1e3c78;
+        }
+
+        .dark-theme .deck-card.selected .deck-content {
+            background: linear-gradient(135deg, #8a80ff 0%, #7b6ef6 100%);
+            border-color: #4c3bbc;
+            color: #ffffff;
+        }
+
+        .dark-theme .game-info {
+            border-color: #a29bfe;
+            box-shadow: 0 4px 15px rgba(162, 155, 254, 0.3);
+        }
+
+        /* Ruletka w stylu CS:GO */
+        .roulette-container {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+            border: 3px solid #2e5cb8;
+            box-shadow: 0 4px 15px rgba(46, 92, 184, 0.3);
+            overflow: hidden;
+        }
+
+        .roulette-wrapper {
+            position: relative;
+            height: 80px;
+            overflow: hidden;
+            background: linear-gradient(90deg, 
+                rgba(46, 92, 184, 0.8) 0%, 
+                rgba(46, 92, 184, 0.1) 20%, 
+                transparent 50%, 
+                rgba(46, 92, 184, 0.1) 80%, 
+                rgba(46, 92, 184, 0.8) 100%);
+            border-radius: 10px;
+            border: 2px solid #2e5cb8;
+        }
+
+        .roulette-strip {
+            display: flex;
+            position: absolute;
+            height: 100%;
+            transition: transform 2.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            will-change: transform;
+        }
+
+        .roulette-item {
+            min-width: 120px;
+            height: 76px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #4a90e2 0%, #2e5cb8 100%);
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            margin: 0 2px;
+            border-radius: 8px;
+            border: 2px solid #ffffff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            line-height: 1.2;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        @keyframes winner-pulse-once {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 15px rgba(255, 107, 107, 0.8);
+            }
+            30% {
+                transform: scale(1.15);
+                box-shadow: 0 0 35px rgba(255, 107, 107, 1), 0 0 50px rgba(255, 107, 107, 0.7);
+            }
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 20px rgba(255, 107, 107, 0.9);
+            }
+        }
+
+        .roulette-item.winner {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ff4757 100%) !important;
+            border-color: #ffffff !important;
+            box-shadow: 0 0 20px rgba(255, 107, 107, 0.9);
+            z-index: 5;
+        }
+
+        .roulette-item.winner.pulse {
+            animation: winner-pulse-once 0.6s ease-out;
+        }
+
+        .roulette-selector {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 4px;
+            height: 90px;
+            background: linear-gradient(to bottom, #ff6b6b, #ff4757);
+            border-radius: 2px;
+            box-shadow: 0 0 10px rgba(255, 107, 107, 0.8);
+            z-index: 10;
+        }
+
+        .roulette-selector::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 15px solid #ff4757;
+            filter: drop-shadow(0 0 5px rgba(255, 107, 107, 0.6));
+        }
+
+        .roulette-selector::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 15px solid #ff4757;
+            filter: drop-shadow(0 0 5px rgba(255, 107, 107, 0.6));
+        }
+
+        .dark-theme .roulette-container {
+            background: linear-gradient(135deg, #1a252f 0%, #2c3e50 100%);
+            border-color: #a29bfe;
+            box-shadow: 0 4px 15px rgba(162, 155, 254, 0.3);
+        }
+
+        .dark-theme .roulette-wrapper {
+            background: linear-gradient(90deg, 
+                rgba(162, 155, 254, 0.8) 0%, 
+                rgba(162, 155, 254, 0.1) 20%, 
+                transparent 50%, 
+                rgba(162, 155, 254, 0.1) 80%, 
+                rgba(162, 155, 254, 0.8) 100%);
+            border-color: #a29bfe;
+        }
+
+        .dark-theme .roulette-item {
+            background: linear-gradient(135deg, #8a80ff 0%, #7b6ef6 100%);
+            border-color: #a29bfe;
+        }
+
+        /* Panele kierunku */
+        .direction-container {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .direction-panel {
+            background: linear-gradient(135deg, #4a90e2 0%, #2e5cb8 100%);
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+            padding: 15px 25px;
+            border-radius: 10px;
+            border: 2px solid #ffffff;
+            box-shadow: 0 3px 12px rgba(74, 144, 226, 0.3);
+            transition: all 0.3s ease;
+            min-width: 100px;
+            text-align: center;
+        }
+
+        .direction-panel.winner {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ff4757 100%) !important;
+            border-color: #ffffff !important;
+            box-shadow: 0 0 20px rgba(255, 107, 107, 0.8) !important;
+            transform: scale(1.1) !important;
+        }
+
+        .dark-theme .direction-panel {
+            background: linear-gradient(135deg, #8a80ff 0%, #7b6ef6 100%);
+            border-color: #a29bfe;
+            box-shadow: 0 4px 15px rgba(162, 155, 254, 0.3);
+        }
+
+        @keyframes pulse-direction {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 0.7;
+            }
+            50% {
+                transform: scale(1.05);
+                opacity: 1;
+            }
+        }
+
+
+        .direction-panel.animating {
+            animation: pulse-direction 0.6s ease-in-out;
+        }
+
+        .dark-theme #direction-section div:first-child {
+            color: #a29bfe !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="theme-buttons">
+        <button class="theme-btn active" onclick="setTheme('white')" id="white-btn">White</button>
+        <button class="theme-btn" onclick="setTheme('dark')" id="dark-btn">Dark</button>
+    </div>
+
+    <div class="container">
+        <img src="Design/Name Panel White.png" alt="Gra Impostor" style="max-width: 500px; height: auto; margin-bottom: 30px; display: block; margin-left: auto; margin-right: auto;" id="logo-img">
+
+        <!-- Sekcja wyboru talii -->
+        <div id="deck-selection" class="section active">
+            <h2>Wybierz talie kart</h2>
+            <div id="selected-count" style="margin-bottom: 20px; font-size: 16px; color: #666;">Wybrano 0 talii</div>
+            <div class="deck-selection">
+                <button class="deck-card" data-deck="impreza">
+                    <div class="deck-content">
+                        <div class="deck-title">🎉 Impreza 🎉</div>
+                        <div style="font-size: 14px; margin: 2px 0;">Alkohol, muzyka, zabawa</div>
+                    </div>
+                    <img src="Images/Playing Cards/Party.png" alt="Impreza" class="deck-image-png">
+                </button>
+                <button class="deck-card" data-deck="miasto">
+                    <div class="deck-content">
+                        <div class="deck-title">🏙️ Miasto 🏙️</div>
+                        <div style="font-size: 14px; margin: 2px 0;">Ulice, budynki, życie miejskie</div>
+                    </div>
+                    <img src="Images/Playing Cards/City.png" alt="Miasto" class="deck-image-png">
+                </button>
+                <button class="deck-card" data-deck="natura">
+                    <div class="deck-content">
+                        <div class="deck-title">🌲 Natura 🌲</div>
+                        <div style="font-size: 14px; margin: 2px 0;">Las, zwierzęta, przyroda</div>
+                    </div>
+                    <img src="Images/Playing Cards/Nature.png" alt="Natura" class="deck-image-png">
+                </button>
+                <button class="deck-card" data-deck="technologia">
+                    <div class="deck-content">
+                        <div class="deck-title">💻 Technologia 💻</div>
+                        <div style="font-size: 14px; margin: 2px 0;">Komputery, internet, gadżety</div>
+                    </div>
+                    <img src="Images/Playing Cards/Technology.png" alt="Technologia" class="deck-image-png">
+                </button>
+                <button class="deck-card" data-deck="kuchnia">
+                    <div class="deck-content">
+                        <div class="deck-title">🍳 Kuchnia 🍳</div>
+                        <div style="font-size: 14px; margin: 2px 0;">Gotowanie, jedzenie, przepisy</div>
+                    </div>
+                    <img src="Images/Playing Cards/Food.png" alt="Kuchnia" class="deck-image-png">
+                </button>
+                <button class="deck-card" data-deck="casino">
+                    <div class="deck-content">
+                        <div class="deck-title">🎰 Kasyno 🎰</div>
+                        <div style="font-size: 14px; margin: 2px 0;">Hazard, karty, ruletka</div>
+                    </div>
+                    <img src="Images/Playing Cards/Casino.png" alt="Kasyno" class="deck-image-png">
+                </button>
+                <button class="deck-card" data-deck="wakacje">
+                    <div class="deck-content">
+                        <div class="deck-title">🏖️ Wakacje 🏖️</div>
+                        <div style="font-size: 14px; margin: 2px 0;">Plaża, urlop, podróże</div>
+                    </div>
+                    <img src="Images/Playing Cards/Holydays.png" alt="Wakacje" class="deck-image-png">
+                </button>
+                <button class="deck-card" data-deck="przyszlosc">
+                    <div class="deck-content">
+                        <div class="deck-title">🚀 Przyszłość 🚀</div>
+                        <div style="font-size: 14px; margin: 2px 0;">Kosmos, roboty, sci-fi</div>
+                    </div>
+                    <img src="Images/Playing Cards/Future.png" alt="Przyszłość" class="deck-image-png">
+                </button>
+            </div>
+            <div id="deck-error" class="error" style="display: none;">Wybierz przynajmniej jedną talię!</div>
+            <button class="btn" onclick="nextToPlayerSetup()">Dalej</button>
+        </div>
+
+        <!-- Sekcja konfiguracji graczy -->
+        <div id="player-setup" class="section">
+            <h2>Konfiguracja graczy</h2>
+            <div class="form-group">
+                <label for="player-count">Liczba graczy (3-10):</label>
+                <select id="player-count" onchange="updatePlayerInputs()">
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                    <option value="10">10</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="impostor-count">Liczba impostorów (1-5):</label>
+                <select id="impostor-count">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Imiona graczy (opcjonalnie):</label>
+                <div id="player-inputs" class="players-list"></div>
+            </div>
+
+            <button class="btn" onclick="backToDeckSelection()">Wróć</button>
+            <button class="btn" onclick="startGame()">Rozpocznij Grę</button>
+        </div>
+
+        <!-- Sekcja gry -->
+        <div id="game-section" class="section">
+            <div style="text-align: center;">
+                <div id="round-info" class="round-info"></div>
+            </div>
+            <div id="current-player" class="game-info"></div>
+            <div id="password-section" style="position: relative; height: 120px; display: none;">
+                <div id="password-display" class="password-reveal"></div>
+            </div>
+
+            <div id="player-roulette" style="display: none;">
+                <div class="roulette-container">
+                    <div class="roulette-wrapper">
+                        <div id="roulette-strip" class="roulette-strip"></div>
+                        <div class="roulette-selector"></div>
+                    </div>
+                </div>
+
+                <div id="direction-section" style="display: none; margin-top: 20px;">
+                    <div style="margin-bottom: 20px; font-size: 18px; font-weight: bold; color: #2e5cb8;">Kierunek</div>
+                    <div class="direction-container">
+                        <div class="direction-panel" id="left-panel">← Lewo</div>
+                        <div class="direction-panel" id="right-panel">Prawo →</div>
+                    </div>
+                </div>
+
+                <button class="btn" id="confirm-selection-btn" onclick="confirmStartingPlayer()" style="display: none;">Potwierdź wybór</button>
+            </div>
+
+            <div id="game-flow" style="display: none;">
+                <div class="round-info" style="display: block; margin: 20px 0;">
+                    <div id="starting-player"></div>
+                    <div id="direction"></div>
+                </div>
+                <div style="text-align: center;">
+                    <button class="btn" onclick="nextRound()">Następna runda</button>
+                    <button class="btn" onclick="resetGame()">Nowa gra</button>
+                </div>
+            </div>
+
+            <button id="game-action-btn" class="game-action-button hidden" onclick="showPassword()">Pokaż hasło</button>
+        </div>
+    </div>
+
+    <script>
+        const decks = {
+            impreza: {
+                title: "Impreza",
+                words: [
+                    "wódka", "koktajl", "zioło", "alkoholik", "bar", "drink", "shots", "piwo", "wino", "szampan",
+                    "taniec", "muzyka", "DJ", "bass", "rytm", "parkiet", "disco", "club", "beat", "remix",
+                    "karaoke", "mikrofon", "scena", "występ", "publiczność", "brawa", "bis", "hit", "cover", "solista",
+                    "szaleństwo", "ekstaza", "euforia", "adrenalina", "energia", "vibes", "klimat", "atmosfera", "nastrój", "feeling",
+                    "party", "baw", "relaks", "chill", "fun", "sztos", "czad", "melanż", "impra", "beka"
+                ]
+            },
+            miasto: {
+                title: "Miasto",
+                words: [
+                    "ulica", "wieżowiec", "beton", "korposzczur", "metro", "autobus", "ruch", "korek", "sygnalizacja", "przejście",
+                    "centrum", "dzielnica", "osiedle", "blok", "kamienica", "apartament", "mieszkanie", "wynajm", "kredyt", "hipoteka",
+                    "urzędnik", "magistrat", "dokumenty", "podatek", "mandat", "kontroler", "straż", "policja", "patrol", "interwencja",
+                    "smog", "hałas", "tłum", "anonimowość", "samotność", "stress", "pośpiech", "deadline", "praca", "kariera",
+                    "sklep", "galeria", "restauracja", "kawiarnia", "pub", "kino", "teatr", "muzeum", "park", "skwer"
+                ]
+            },
+            natura: {
+                title: "Natura",
+                words: [
+                    "las", "drzewo", "liść", "gałąź", "korzenie", "pień", "kora", "żywica", "szyszka", "igły",
+                    "zwierzę", "ptak", "gniazdo", "śpiew", "lot", "skrzydła", "pióra", "dziób", "szpony", "ogon",
+                    "rzeka", "strumień", "źródło", "wodospad", "brzeg", "kamień", "żwir", "piasek", "mech", "porost",
+                    "kwiat", "pąk", "płatek", "zapach", "nektar", "pyłek", "owad", "pszczoła", "motyl", "larwa",
+                    "świt", "zmierzch", "mgła", "rosa", "wiatr", "burza", "grzmot", "błyskawica", "deszcz", "tęcza"
+                ]
+            },
+            technologia: {
+                title: "Technologia",
+                words: [
+                    "komputer", "laptop", "procesor", "pamięć", "dysk", "karta", "monitor", "klawiatura", "mysz", "słuchawki",
+                    "internet", "wifi", "sieć", "router", "modem", "kabel", "bluetooth", "streaming", "download", "upload",
+                    "program", "aplikacja", "software", "system", "windows", "update", "backup", "virus", "firewall", "antivirus",
+                    "kod", "programowanie", "developer", "bug", "debugowanie", "kompilacja", "algorytm", "baza", "serwer", "hosting",
+                    "smartfon", "tablet", "ekran", "dotyk", "apka", "notification", "messenger", "social", "media", "like"
+                ]
+            },
+            kuchnia: {
+                title: "Kuchnia",
+                words: [
+                    "gotowanie", "smażenie", "pieczenie", "duszenie", "grillowanie", "blanszowanie", "marynowanie", "przyprawianie", "mieszanie", "krojenie",
+                    "nóż", "deska", "patelnia", "garnek", "piekarnik", "kuchenka", "toster", "mikser", "blender", "robot",
+                    "mięso", "ryba", "kurczak", "wołowina", "wieprzowina", "kiełbasa", "szynka", "kotlet", "gulasz", "rosół",
+                    "warzywa", "ziemniaki", "marchew", "cebula", "czosnek", "pomidor", "ogórek", "kapusta", "kalafior", "brokuł",
+                    "przyprawy", "sól", "pieprz", "papryka", "oregano", "bazylia", "tymianek", "majeranek", "curry", "cynamon"
+                ]
+            },
+            casino: {
+                title: "Kasyno",
+                words: [
+                    "ruletka", "poker", "blackjack", "jednoręki", "bandyta", "żetony", "stawka", "krupier", "stół", "karty",
+                    "hazard", "szczęście", "ryzyko", "wygrana", "przegrana", "jackpot", "bonus", "automat", "sloty", "kości",
+                    "bluff", "all-in", "fold", "check", "raise", "call", "dealer", "hand", "flush", "full",
+                    "straight", "pair", "high", "low", "split", "double", "hit", "stand", "bust", "insurance",
+                    "chips", "bet", "win", "lose", "cash", "money", "vegas", "monte", "carlo", "macau"
+                ]
+            },
+            wakacje: {
+                title: "Wakacje",
+                words: [
+                    "plaża", "morze", "piasek", "fale", "słońce", "opalanie", "parasol", "leżak", "krem", "okulary",
+                    "podróż", "walizka", "lot", "samolot", "hotel", "resort", "basen", "koktajl", "palma", "wyspa",
+                    "turystyka", "zwiedzanie", "pamiątki", "zdjęcia", "selfie", "widokówka", "mapa", "przewodnik", "wycieczka", "atrakcje",
+                    "relaks", "odpoczynek", "urlop", "wakacje", "camping", "namiot", "ognisko", "góry", "las", "jezioro",
+                    "kajak", "rower", "spacer", "piknik", "grill", "natura", "świeże", "powietrze", "cisza", "spokój"
+                ]
+            },
+            przyszlosc: {
+                title: "Przyszłość",
+                words: [
+                    "robot", "cyborg", "android", "sztuczna", "inteligencja", "AI", "hologram", "teleportacja", "kosmos", "rakieta",
+                    "mars", "kolonia", "statek", "kosmiczny", "alien", "UFO", "laser", "energia", "fusion", "reaktor",
+                    "nano", "technologia", "chip", "implant", "upgrade", "matrix", "wirtualna", "rzeczywistość", "VR", "AR",
+                    "dron", "samochód", "autonomiczny", "hyperloop", "portal", "czasoprzestrzeń", "wymiar", "galaktyka", "planeta", "orbita",
+                    "klon", "DNA", "genetyka", "modyfikacja", "evolution", "progress", "innovation", "discovery", "expedition", "future"
+                ]
+            }
+        };
+
+        let selectedDecks = [];
+        let players = [];
+        let currentPlayerIndex = 0;
+        let currentRound = 1;
+        let gameWords = [];
+        let currentPassword = "";
+        let impostors = [];
+        let playersShownPassword = 0;
+        let isAnimating = {};
+
+        function selectDeck(deckName) {
+            // Zabezpieczenie przed wielokrotnym kliknięciem podczas animacji
+            if (isAnimating[deckName]) {
+                return;
+            }
+            
+            const deckCard = document.querySelector(`[data-deck="${deckName}"]`);
+            const originalText = deckCard.innerHTML;
+            
+            if (selectedDecks.includes(deckName)) {
+                selectedDecks = selectedDecks.filter(deck => deck !== deckName);
+                deckCard.classList.remove('selected');
+                // Przywróć perspektywę po odznaczeniu
+                setTimeout(() => updateCardPerspective(), 10);
+            } else {
+                selectedDecks.push(deckName);
+                deckCard.classList.add('selected');
+                
+                // Zablokuj animację na czas trwania
+                isAnimating[deckName] = true;
+                
+                // Dodaj event listener dla końca animacji
+                const handleAnimationEnd = (e) => {
+                    if (e.animationName === 'pulse-select') {
+                        deckCard.removeEventListener('animationend', handleAnimationEnd);
+                        if (deckCard.classList.contains('selected')) {
+                            deckCard.style.transform = 'scale(1.05) translateY(-3px)';
+                        }
+                        isAnimating[deckName] = false;
+                    }
+                };
+                
+                deckCard.addEventListener('animationend', handleAnimationEnd);
+                
+                // Backup timeout w case animacji się nie zakończy
+                setTimeout(() => {
+                    if (isAnimating[deckName]) {
+                        deckCard.removeEventListener('animationend', handleAnimationEnd);
+                        if (deckCard.classList.contains('selected')) {
+                            deckCard.style.transform = 'scale(1.05) translateY(-3px)';
+                        }
+                        isAnimating[deckName] = false;
+                    }
+                }, 700);
+            }
+
+            // Aktualizuj licznik
+            updateSelectedCount();
+            document.getElementById('deck-error').style.display = 'none';
+        }
+
+        function updateSelectedCount() {
+            const count = selectedDecks.length;
+            const countElement = document.getElementById('selected-count');
+            if (count === 0) {
+                countElement.textContent = 'Wybrano 0 talii';
+            } else if (count === 1) {
+                countElement.textContent = 'Wybrano 1 talię';
+            } else if (count <= 4) {
+                countElement.textContent = `Wybrano ${count} talie`;
+            } else {
+                countElement.textContent = `Wybrano ${count} talii`;
+            }
+        }
+
+
+        function nextToPlayerSetup() {
+            if (selectedDecks.length === 0) {
+                document.getElementById('deck-error').style.display = 'block';
+                return;
+            }
+
+            changeSection('deck-selection', 'player-setup', () => {
+                const container = document.querySelector('.container');
+                container.classList.add('expanded');
+                updatePlayerInputs();
+            });
+        }
+
+        function backToDeckSelection() {
+            changeSection('player-setup', 'deck-selection', () => {
+                const container = document.querySelector('.container');
+                container.classList.remove('expanded');
+            });
+        }
+
+        function updatePlayerInputs() {
+            const playerCount = parseInt(document.getElementById('player-count').value);
+            const playerInputs = document.getElementById('player-inputs');
+            const impostorSelect = document.getElementById('impostor-count');
+
+            playerInputs.innerHTML = '';
+
+            for (let i = 1; i <= playerCount; i++) {
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.placeholder = `Gracz ${i}`;
+                input.id = `player-${i}`;
+                playerInputs.appendChild(input);
+            }
+
+            impostorSelect.innerHTML = '';
+            const maxImpostors = Math.min(5, Math.floor(playerCount / 2));
+            for (let i = 1; i <= maxImpostors; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i;
+                impostorSelect.appendChild(option);
+            }
+        }
+
+        function startGame() {
+            const playerCount = parseInt(document.getElementById('player-count').value);
+            const impostorCount = parseInt(document.getElementById('impostor-count').value);
+            
+            players = [];
+            gameWords = [];
+
+            for (let i = 1; i <= playerCount; i++) {
+                const nameInput = document.getElementById(`player-${i}`);
+                const playerName = nameInput.value.trim() || `Gracz ${i}`;
+                players.push(playerName);
+            }
+
+            selectedDecks.forEach(deckName => {
+                gameWords = gameWords.concat(decks[deckName].words);
+            });
+
+            // Użyj tej samej animacji co showGameFlow
+            const container = document.querySelector('.container');
+
+            // NAJPIERW zmień sekcję i uruchom nextRound (kontener nadal expanded)
+            document.getElementById('player-setup').classList.remove('active');
+            document.getElementById('game-section').classList.add('active');
+            nextRound();
+
+            // POTEM usuń expanded (przycisk płynnie opada razem z kontenerem)
+            setTimeout(() => {
+                container.classList.remove('expanded');
+            }, 100);
+        }
+
+        function nextRound() {
+            currentPassword = gameWords[Math.floor(Math.random() * gameWords.length)];
+            
+            const impostorCount = parseInt(document.getElementById('impostor-count').value);
+            impostors = [];
+            const shuffledPlayers = [...Array(players.length).keys()];
+            
+            for (let i = shuffledPlayers.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffledPlayers[i], shuffledPlayers[j]] = [shuffledPlayers[j], shuffledPlayers[i]];
+            }
+            
+            for (let i = 0; i < impostorCount; i++) {
+                impostors.push(shuffledPlayers[i]);
+            }
+
+            currentPlayerIndex = 0;
+            playersShownPassword = 0;
+            
+            document.getElementById('round-info').innerHTML = `<h2>Runda ${currentRound}</h2>`;
+            const currentPlayerEl = document.getElementById('current-player');
+            // Ustaw panel gracza i przycisk jednocześnie
+            currentPlayerEl.innerHTML = players[currentPlayerIndex];
+            currentPlayerEl.className = 'game-info'; // Przywróć klasę game-info dla panelu
+            currentPlayerEl.style.display = 'block';
+            // Wyczyść inline style z poprzedniej rundy
+            currentPlayerEl.style.fontSize = '';
+            currentPlayerEl.style.fontWeight = '';
+            currentPlayerEl.style.color = '';
+            currentPlayerEl.style.margin = '';
+            document.getElementById('password-section').style.display = 'none';
+            document.getElementById('game-flow').style.display = 'none';
+
+            // Pokaż przycisk w tym samym momencie
+            document.getElementById('game-action-btn').classList.remove('hidden');
+        }
+
+        function showPassword() {
+            const isImpostor = impostors.includes(currentPlayerIndex);
+            const passwordDisplay = document.getElementById('password-display');
+            const showBtn = document.getElementById('game-action-btn');
+            const passwordSection = document.getElementById('password-section');
+            const container = document.querySelector('.container');
+
+            // Rozszerz kontener
+            container.classList.add('expanded');
+
+            // Przygotuj zawartość panelu
+            if (isImpostor) {
+                passwordDisplay.innerHTML = `
+                    <div style="margin-bottom: 15px; font-size: 18px; color: #ffffff; opacity: 0.9;">Rola gracza:</div>
+                    <div style="font-size: 28px; font-weight: bold; color: #ffffff; text-shadow: 2px 2px 4px rgba(231, 76, 60, 0.8);">😈 Jesteś impostorem!</div>
+                `;
+            } else {
+                passwordDisplay.innerHTML = `
+                    <div style="margin-bottom: 15px; font-size: 18px;">Twoje hasło to:</div>
+                    <div style="font-size: 28px; font-weight: bold;">${currentPassword}</div>
+                `;
+            }
+
+            // Pokaż panel z hasłem
+            passwordSection.style.display = 'block';
+            passwordDisplay.classList.add('show');
+
+            // Zmień przycisk na "OK"
+            showBtn.innerHTML = 'OK';
+            showBtn.onclick = nextPlayer;
+        }
+
+        function nextPlayer() {
+            playersShownPassword++;
+            
+            if (playersShownPassword < players.length) {
+                currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+                const currentPlayerEl = document.getElementById('current-player');
+                currentPlayerEl.innerHTML = players[currentPlayerIndex];
+                currentPlayerEl.className = 'game-info'; // Upewnij się że ma klasę game-info
+
+                // Reset animacji panelu hasła
+                const passwordDisplay = document.getElementById('password-display');
+                passwordDisplay.classList.remove('show');
+
+                // Reset animacji kontenera
+                const container = document.querySelector('.container');
+                container.classList.remove('expanded');
+
+                // Reset przycisku
+                const showBtn = document.getElementById('game-action-btn');
+                showBtn.innerHTML = 'Pokaż hasło';
+                showBtn.onclick = showPassword;
+                showBtn.classList.add('visible');
+                document.getElementById('password-section').style.display = 'none';
+            } else {
+                showGameFlow();
+            }
+        }
+
+        function showGameFlow() {
+            const container = document.querySelector('.container');
+
+            // Animacja zmniejszenia kontenera
+            container.classList.add('changing');
+
+            setTimeout(() => {
+                document.getElementById('password-section').style.display = 'none';
+                container.classList.remove('expanded');
+
+                const currentPlayerEl = document.getElementById('current-player');
+                currentPlayerEl.innerHTML = '🎲 Kto zaczyna?';
+                currentPlayerEl.className = ''; // Usuń klasę game-info żeby nie miał panelu
+                currentPlayerEl.style.display = 'block';
+                currentPlayerEl.style.fontSize = '24px';
+                currentPlayerEl.style.fontWeight = 'bold';
+                // Ustaw kolor zależnie od motywu
+                if (document.body.classList.contains('dark-theme')) {
+                    currentPlayerEl.style.color = '#ecf0f1';
+                } else {
+                    currentPlayerEl.style.color = '#2c3e50';
+                }
+                currentPlayerEl.style.margin = '20px 0';
+                document.getElementById('game-action-btn').innerHTML = '🎲 Losuj';
+                document.getElementById('game-action-btn').onclick = startRoulette;
+                document.getElementById('game-action-btn').classList.remove('hidden');
+
+                setTimeout(() => {
+                    container.classList.remove('changing');
+                }, 50);
+            }, 150);
+        }
+
+        let selectedStartingPlayer = null;
+
+        function changeSection(fromSectionId, toSectionId, callback) {
+            const container = document.querySelector('.container');
+            const fromSection = document.getElementById(fromSectionId);
+            const toSection = document.getElementById(toSectionId);
+
+            // Zmień sekcje natychmiast
+            fromSection.classList.remove('active');
+            toSection.classList.add('active');
+
+            // Wykonaj dodatkową logikę jeśli potrzebna
+            if (callback) callback();
+
+            // Dodaj i usuń animację dla efektu wizualnego
+            container.classList.add('changing');
+            setTimeout(() => {
+                container.classList.remove('changing');
+            }, 300);
+        }
+
+        function startRoulette() {
+            document.getElementById('game-action-btn').classList.add('hidden');
+            document.getElementById('player-roulette').style.display = 'block';
+            document.getElementById('direction-section').style.display = 'block';
+
+            // Pokaż przyciski kierunku jako zacienione podczas losowania gracza
+            const leftPanel = document.getElementById('left-panel');
+            const rightPanel = document.getElementById('right-panel');
+            leftPanel.style.opacity = '0.4';
+            rightPanel.style.opacity = '0.4';
+
+            createRouletteStrip();
+
+            setTimeout(() => {
+                spinRoulette();
+            }, 500);
+        }
+
+        function createRouletteStrip() {
+            const strip = document.getElementById('roulette-strip');
+            strip.innerHTML = '';
+            
+            // Stwórz długi pasek z graczami (powtarzając ich wielokrotnie)
+            const totalItems = players.length * 10; // 10 razy każdy gracz
+            const items = [];
+            
+            for (let i = 0; i < totalItems; i++) {
+                items.push(players[i % players.length]);
+            }
+            
+            // Wylosuj zwycięzcę
+            const winnerName = players[Math.floor(Math.random() * players.length)];
+            selectedStartingPlayer = players.indexOf(winnerName);
+            
+            // Ustaw pozycję wygranego na końcu (aby się zatrzymało na nim)
+            const winnerPosition = Math.floor(totalItems * 0.7) + Math.floor(Math.random() * 8);
+            items[winnerPosition] = winnerName;
+            
+            // Stwórz elementy HTML
+            items.forEach((playerName, index) => {
+                const item = document.createElement('div');
+                item.className = 'roulette-item';
+                item.textContent = playerName;
+                item.dataset.position = index;
+                item.dataset.winnerPosition = winnerPosition;
+                
+                // Ustaw kolor - czerwony dla zwycięzcy, normalny dla pozostałych
+                if (index === winnerPosition) {
+                    item.classList.add('winner');
+                }
+                
+                strip.appendChild(item);
+            });
+            
+            // Ustaw pozycję początkową aby panele były widoczne
+            const containerWidth = document.querySelector('.roulette-wrapper').offsetWidth;
+            const itemWidth = 124;
+            const startPosition = -(Math.floor(totalItems * 0.3) * itemWidth);
+            
+            // Reset transition i ustaw pozycję startową
+            strip.style.transition = 'none';
+            strip.style.transform = `translateX(${startPosition}px)`;
+            
+            // Przywróć transition po ustawieniu pozycji
+            setTimeout(() => {
+                strip.style.transition = 'transform 2.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+            }, 50);
+        }
+
+        function spinRoulette() {
+            const strip = document.getElementById('roulette-strip');
+            const containerWidth = document.querySelector('.roulette-wrapper').offsetWidth;
+            const itemWidth = 124; // 120px + 4px margin
+            
+            // Oblicz pozycje
+            const winnerPosition = parseInt(strip.children[0].dataset.winnerPosition);
+            const finalPosition = -(winnerPosition * itemWidth - containerWidth / 2 + itemWidth / 2);
+            const currentPosition = parseFloat(strip.style.transform.replace('translateX(', '').replace('px)', '')) || 0;
+            const pullbackPosition = currentPosition + 60; // Cofnij się o 60px w prawo
+            
+            // Etap 1: Cofnij się (efekt napiącia procy)
+            setTimeout(() => {
+                strip.style.transition = 'transform 0.2s ease-out';
+                strip.style.transform = `translateX(${pullbackPosition}px)`;
+                
+                // Etap 2: Wystrzał do przodu po cofnięciu
+                setTimeout(() => {
+                    strip.style.transition = 'transform 2.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                    strip.style.transform = `translateX(${finalPosition}px)`;
+                    
+                    // Po zakończeniu animacji dodaj jednorazowy puls do wylosowanego gracza
+                    setTimeout(() => {
+                        const winnerElement = strip.querySelector('.roulette-item.winner');
+                        if (winnerElement) {
+                            winnerElement.classList.add('pulse');
+                        }
+
+                        // Po pulsie rozpocznij losowanie kierunku
+                        setTimeout(() => {
+                            startDirectionRoulette();
+                        }, 600);
+                    }, 2500);
+                }, 200);
+            }, 100);
+        }
+
+        let selectedDirection = null;
+
+        function startDirectionRoulette() {
+            // Sekcja kierunku jest już widoczna, teraz resetuj przezroczystość
+            const leftPanel = document.getElementById('left-panel');
+            const rightPanel = document.getElementById('right-panel');
+            leftPanel.style.opacity = '1';
+            rightPanel.style.opacity = '1';
+
+            // Wylosuj kierunek
+            selectedDirection = Math.random() < 0.5 ? 'left' : 'right';
+
+            // Rozpocznij animację po krótkiej przerwie
+            setTimeout(() => {
+                animateDirectionPanels();
+            }, 300);
+        }
+
+        function animateDirectionPanels() {
+            const leftPanel = document.getElementById('left-panel');
+            const rightPanel = document.getElementById('right-panel');
+            let currentPanel = 'left';
+            let switchCount = 0;
+            const totalSwitches = 4; // 2 razy każdy panel
+
+            const switchInterval = setInterval(() => {
+                // Reset klas animacji
+                leftPanel.classList.remove('animating');
+                rightPanel.classList.remove('animating');
+                
+                // Dodaj animację do aktywnego panelu
+                if (currentPanel === 'left') {
+                    leftPanel.classList.add('animating');
+                    currentPanel = 'right';
+                } else {
+                    rightPanel.classList.add('animating');
+                    currentPanel = 'left';
+                }
+                
+                switchCount++;
+                
+                // Zakończ animację
+                if (switchCount >= totalSwitches) {
+                    clearInterval(switchInterval);
+                    
+                    // Po zakończeniu animacji pokaż zwycięzca
+                    setTimeout(() => {
+                        showDirectionWinner();
+                    }, 200);
+                }
+            }, 150); // Co 150ms przełączaj
+        }
+
+        function showDirectionWinner() {
+            const leftPanel = document.getElementById('left-panel');
+            const rightPanel = document.getElementById('right-panel');
+            
+            // Usuń wszystkie animacje
+            leftPanel.classList.remove('animating');
+            rightPanel.classList.remove('animating');
+            
+            // Podświetl zwycięzca
+            if (selectedDirection === 'left') {
+                leftPanel.classList.add('winner');
+                rightPanel.style.opacity = '0.5';
+            } else {
+                rightPanel.classList.add('winner');
+                leftPanel.style.opacity = '0.5';
+            }
+            
+            // Po 0.8 sekundy przejdź do podsumowania
+            setTimeout(() => {
+                confirmStartingPlayer();
+            }, 800);
+        }
+
+        function confirmStartingPlayer() {
+            const direction = selectedDirection === 'left' ? 'lewo' : 'prawo';
+            const directionArrow = direction === 'prawo' ? '→' : '←';
+
+
+            document.getElementById('starting-player').innerHTML = `
+                <strong>Zaczyna:</strong> ${players[selectedStartingPlayer]}
+            `;
+            document.getElementById('direction').innerHTML = `
+                <strong>Kierunek gry:</strong> ${direction} <span class="direction-arrow">${directionArrow}</span>
+            `;
+            
+            document.getElementById('current-player').style.display = 'none';
+            document.getElementById('player-roulette').style.display = 'none';
+            document.getElementById('game-flow').style.display = 'block';
+            
+            // Reset dla następnej rundy
+            document.getElementById('game-action-btn').innerHTML = 'Pokaż hasło';
+            document.getElementById('game-action-btn').onclick = showPassword;
+            document.getElementById('confirm-selection-btn').style.display = 'none';
+            
+            // Kompletny reset ruletki
+            const strip = document.getElementById('roulette-strip');
+            strip.style.transition = 'none';
+            strip.style.transform = 'translateX(0px)';
+            strip.innerHTML = '';
+            
+            // Reset paneli kierunku
+            document.getElementById('direction-section').style.display = 'none';
+            const leftPanel = document.getElementById('left-panel');
+            const rightPanel = document.getElementById('right-panel');
+            leftPanel.classList.remove('winner', 'animating');
+            rightPanel.classList.remove('winner', 'animating');
+            leftPanel.style.opacity = '1';
+            rightPanel.style.opacity = '1';
+            
+            currentRound++;
+        }
+
+        function resetGame() {
+            currentRound = 1;
+            selectedDecks = [];
+            players = [];
+            gameWords = [];
+            impostors = [];
+            
+            document.querySelectorAll('.deck-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            // Reset ruletki
+            const strip = document.getElementById('roulette-strip');
+            if (strip) {
+                strip.style.transition = 'none';
+                strip.style.transform = 'translateX(0px)';
+                strip.innerHTML = '';
+            }
+            document.getElementById('player-roulette').style.display = 'none';
+            document.getElementById('confirm-selection-btn').style.display = 'none';
+            
+            // Reset paneli kierunku
+            document.getElementById('direction-section').style.display = 'none';
+            const leftPanel = document.getElementById('left-panel');
+            const rightPanel = document.getElementById('right-panel');
+            if (leftPanel && rightPanel) {
+                leftPanel.classList.remove('winner', 'animating');
+                rightPanel.classList.remove('winner', 'animating');
+                leftPanel.style.opacity = '1';
+                rightPanel.style.opacity = '1';
+            }
+            
+            changeSection('game-section', 'deck-selection');
+        }
+
+        document.querySelectorAll('.deck-card').forEach(card => {
+            card.addEventListener('click', (e) => {
+                if (hasMoved) {
+                    e.preventDefault();
+                    return;
+                }
+                selectDeck(card.dataset.deck);
+            });
+        });
+
+        // Touch scroll dla talii z momentum
+        let isDown = false;
+        let hasMoved = false;
+        let startX;
+        let scrollLeft;
+        let lastX;
+        let velocity = 0;
+        let momentumID = 0;
+        const deckContainer = document.querySelector('.deck-selection');
+
+        function momentum() {
+            deckContainer.scrollLeft -= velocity;
+            velocity *= 0.95; // Opór
+            if (Math.abs(velocity) > 0.5) {
+                momentumID = requestAnimationFrame(momentum);
+            }
+        }
+
+        deckContainer.addEventListener('mousedown', (e) => {
+            isDown = true;
+            hasMoved = false;
+            startX = e.pageX - deckContainer.offsetLeft;
+            lastX = startX;
+            scrollLeft = deckContainer.scrollLeft;
+            velocity = 0;
+            cancelAnimationFrame(momentumID);
+            deckContainer.style.cursor = 'grabbing';
+        });
+
+        deckContainer.addEventListener('mouseleave', () => {
+            if (isDown && Math.abs(velocity) > 1) {
+                momentumID = requestAnimationFrame(momentum);
+            }
+            isDown = false;
+            deckContainer.style.cursor = 'grab';
+        });
+
+        deckContainer.addEventListener('mouseup', () => {
+            if (isDown && Math.abs(velocity) > 1) {
+                momentumID = requestAnimationFrame(momentum);
+            }
+            isDown = false;
+            deckContainer.style.cursor = 'grab';
+        });
+
+        deckContainer.addEventListener('mousemove', (e) => {
+            if (!isDown) return;
+            e.preventDefault();
+            hasMoved = true;
+            const x = e.pageX - deckContainer.offsetLeft;
+            const walk = (x - startX);
+            velocity = x - lastX;
+            lastX = x;
+            deckContainer.scrollLeft = scrollLeft - walk;
+            updateCardPerspective();
+        });
+
+        // Touch events dla urządzeń mobilnych z momentum
+        deckContainer.addEventListener('touchstart', (e) => {
+            hasMoved = false;
+            startX = e.touches[0].pageX;
+            lastX = startX;
+            scrollLeft = deckContainer.scrollLeft;
+            velocity = 0;
+            cancelAnimationFrame(momentumID);
+        }, { passive: false });
+
+        deckContainer.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            hasMoved = true;
+            const x = e.touches[0].pageX;
+            const walk = (x - startX);
+            velocity = x - lastX;
+            lastX = x;
+            deckContainer.scrollLeft = scrollLeft - walk;
+            updateCardPerspective();
+        }, { passive: false });
+
+        deckContainer.addEventListener('touchend', (e) => {
+            if (Math.abs(velocity) > 1) {
+                momentumID = requestAnimationFrame(momentum);
+            }
+        });
+
+        deckContainer.style.cursor = 'grab';
+
+        // Funkcja do aktualizacji perspektywy talii
+        function updateCardPerspective() {
+            const cards = document.querySelectorAll('.deck-card');
+            const containerRect = deckContainer.getBoundingClientRect();
+            const containerCenter = containerRect.left + containerRect.width / 2;
+
+            cards.forEach(card => {
+                const cardRect = card.getBoundingClientRect();
+                const cardCenter = cardRect.left + cardRect.width / 2;
+                const distanceFromCenter = Math.abs(cardCenter - containerCenter);
+                const maxDistance = containerRect.width / 2;
+                
+                // Oblicz skalę (od 0.9 do 1.0)
+                const normalizedDistance = Math.min(distanceFromCenter / maxDistance, 1);
+                const scale = 1 - (normalizedDistance * 0.1);
+                
+                // Zastosuj skalę tylko jeśli karta nie jest wybrana
+                if (!card.classList.contains('selected')) {
+                    card.style.transform = `scale(${scale})`;
+                }
+            });
+        }
+
+        // Aktualizuj perspektywę podczas scroll
+        deckContainer.addEventListener('scroll', updateCardPerspective);
+        
+        // Aktualizuj perspektywę przy załadowaniu strony
+        setTimeout(updateCardPerspective, 100);
+        
+        // Aktualizuj perspektywę przy zmianie rozmiaru okna
+        window.addEventListener('resize', updateCardPerspective);
+
+        updatePlayerInputs();
+
+        function setTheme(theme) {
+            const body = document.body;
+            const logoImg = document.getElementById('logo-img');
+            const whiteBtn = document.getElementById('white-btn');
+            const darkBtn = document.getElementById('dark-btn');
+
+            if (theme === 'dark') {
+                body.classList.add('dark-theme');
+                logoImg.src = 'Design/Name Panel Dark.png';
+                whiteBtn.classList.remove('active');
+                darkBtn.classList.add('active');
+            } else {
+                body.classList.remove('dark-theme');
+                logoImg.src = 'Design/Name Panel White.png';
+                darkBtn.classList.remove('active');
+                whiteBtn.classList.add('active');
+            }
+
+            // Zapisz wybór w localStorage
+            localStorage.setItem('theme', theme);
+        }
+
+        // Wczytaj zapisany motyw przy starcie
+        const savedTheme = localStorage.getItem('theme') || 'white';
+        setTheme(savedTheme);
+    </script>
+</body>
+</html>
