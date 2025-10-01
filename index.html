@@ -42,6 +42,13 @@
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
         }
 
+        .container.scroll-animation {
+            overflow: hidden;
+            min-height: 750px !important;
+            max-height: 750px !important;
+            height: 750px !important;
+        }
+
         .container.expanded {
             min-height: 750px;
             box-shadow: 0 20px 45px rgba(0, 0, 0, 0.15);
@@ -285,7 +292,7 @@
             margin: 10px;
         }
 
-        .game-action-button {
+        .game-btn {
             background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
             color: white;
             border: none;
@@ -294,33 +301,50 @@
             font-size: 18px;
             font-weight: bold;
             cursor: pointer;
-            position: absolute !important;
-            bottom: 60px !important;
-            left: 50% !important;
-            transform: translateX(-50%) !important;
-            z-index: 1000 !important;
-            transition: none !important;
-            animation: none !important;
-            margin: 0 !important;
+            transition: all 0.3s ease;
+            margin: 0;
+            opacity: 0;
+            transform: scale(0.8) translateY(10px);
         }
 
-        .game-action-button * {
-            transition: none !important;
-            animation: none !important;
+        .game-btn.show {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+            transition: all 0.6s ease 0.4s;
         }
 
-        #game-section:not(.active) #game-action-btn {
-            visibility: hidden;
-        }
-
-        #game-action-btn.hidden {
-            visibility: hidden;
-        }
-
-        .game-action-button:hover {
-            transform: translateX(-50%) translateY(-2px) !important;
+        .game-btn.show:hover {
+            transform: scale(1) translateY(-2px);
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
         }
+
+        /* Nowa animacja fade-in dla paneli losujących */
+        .roulette-container {
+            opacity: 0;
+            transform: scale(0.9) translateY(20px);
+            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            z-index: 1;
+        }
+
+        .roulette-container.scroll-in {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+
+        #direction-section {
+            opacity: 0;
+            transform: scale(0.9) translateY(20px);
+            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s;
+            position: relative;
+            z-index: 1;
+        }
+
+        #direction-section.scroll-in {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+
 
         .btn:hover {
             transform: translateY(-2px);
@@ -343,6 +367,14 @@
             color: white;
             border: 3px solid #2e5cb8;
             box-shadow: 0 4px 15px rgba(90, 103, 216, 0.3);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s ease 0.2s;
+        }
+
+        .game-info.show {
+            opacity: 1;
+            transform: translateY(0);
         }
 
         .password-reveal {
@@ -357,7 +389,7 @@
             position: absolute;
             left: 50%;
             width: calc(100% - 80px);
-            transform: translateX(-50%) translateY(-80px);
+            transform: translateX(-50%) translateY(-120px);
             z-index: 5;
         }
 
@@ -385,6 +417,14 @@
             color: white;
             display: inline-block;
             text-align: center;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.6s ease;
+        }
+
+        .round-info.show {
+            opacity: 1;
+            transform: translateY(0);
         }
 
         .direction-arrow {
@@ -746,6 +786,142 @@
         .dark-theme #direction-section div:first-child {
             color: #a29bfe !important;
         }
+
+        /* Style panelu podsumowania */
+
+
+        .summary-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .summary-header h2 {
+            color: white;
+            font-size: 22px;
+            font-weight: bold;
+            margin: 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .summary-content {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .summary-item {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .summary-label {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .summary-value {
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .summary-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* Ciemny motyw dla panelu podsumowania */
+        .dark-theme .summary-container {
+            background: linear-gradient(135deg, #6c5ce7 0%, #5a4fcf 100%);
+            border-color: #4c3bbc;
+            box-shadow: 0 8px 25px rgba(108, 92, 231, 0.3);
+        }
+
+
+        /* Animacje scroll-phone style */
+        #player-roulette {
+            transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+            z-index: 1;
+        }
+
+        #player-roulette.scroll-up {
+            opacity: 0;
+            transform: translateY(-130%) scale(0.9);
+            pointer-events: none;
+        }
+
+        #summary-panel {
+            position: absolute;
+            top: 120px;
+            left: 0;
+            right: 0;
+            bottom: 80px;
+            z-index: 100;
+        }
+
+        .roulette-container.hide-up {
+            opacity: 0;
+            transform: translateY(-130%);
+            transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        #direction-section.hide-up {
+            opacity: 0;
+            transform: translateY(-130%);
+            transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.1s;
+        }
+
+
+        /* Płynne przejścia dla paneli */
+        #summary-panel, #forgot-password-panel, #summary-main-buttons {
+            transition: opacity 0.3s ease;
+        }
+
+        /* Pozycjonowanie przycisków jak przyciski hasła */
+        #summary-main-buttons {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            z-index: 300;
+        }
+
+        #summary-main-buttons .btn {
+            margin: 0 10px;
+        }
+
+        /* Płynna animacja scroll panelu podsumowania */
+        .summary-container {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+            z-index: 200;
+            background: linear-gradient(135deg, #2d3436 0%, #636e72 100%);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px;
+            box-shadow: 0 6px 20px rgba(45, 52, 54, 0.4);
+            border: 2px solid #636e72;
+        }
+
+        .summary-container.slide-up {
+            opacity: 0.9;
+            transform: translateY(130%) scale(0.9);
+        }
     </style>
 </head>
 <body>
@@ -823,85 +999,135 @@
             <button class="btn" onclick="nextToPlayerSetup()">Dalej</button>
         </div>
 
-        <!-- Sekcja konfiguracji graczy -->
+        <!-- Sekcja konfiguracji graczy i rozgrywki -->
         <div id="player-setup" class="section">
-            <h2>Konfiguracja graczy</h2>
-            <div class="form-group">
-                <label for="player-count">Liczba graczy (3-10):</label>
-                <select id="player-count" onchange="updatePlayerInputs()">
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                    <option value="5">5</option>
-                    <option value="6">6</option>
-                    <option value="7">7</option>
-                    <option value="8">8</option>
-                    <option value="9">9</option>
-                    <option value="10">10</option>
-                </select>
-            </div>
-            
-            <div class="form-group">
-                <label for="impostor-count">Liczba impostorów (1-5):</label>
-                <select id="impostor-count">
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                    <option value="5">5</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label>Imiona graczy (opcjonalnie):</label>
-                <div id="player-inputs" class="players-list"></div>
-            </div>
-
-            <button class="btn" onclick="backToDeckSelection()">Wróć</button>
-            <button class="btn" onclick="startGame()">Rozpocznij Grę</button>
-        </div>
-
-        <!-- Sekcja gry -->
-        <div id="game-section" class="section">
-            <div style="text-align: center;">
-                <div id="round-info" class="round-info"></div>
-            </div>
-            <div id="current-player" class="game-info"></div>
-            <div id="password-section" style="position: relative; height: 120px; display: none;">
-                <div id="password-display" class="password-reveal"></div>
-            </div>
-
-            <div id="player-roulette" style="display: none;">
-                <div class="roulette-container">
-                    <div class="roulette-wrapper">
-                        <div id="roulette-strip" class="roulette-strip"></div>
-                        <div class="roulette-selector"></div>
-                    </div>
+            <!-- Konfiguracja graczy -->
+            <div id="config-content">
+                <h2>Konfiguracja graczy</h2>
+                <div class="form-group">
+                    <label for="player-count">Liczba graczy (3-10):</label>
+                    <select id="player-count" onchange="updatePlayerInputs()">
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                        <option value="9">9</option>
+                        <option value="10">10</option>
+                    </select>
                 </div>
 
-                <div id="direction-section" style="display: none; margin-top: 20px;">
-                    <div style="margin-bottom: 20px; font-size: 18px; font-weight: bold; color: #2e5cb8;">Kierunek</div>
-                    <div class="direction-container">
-                        <div class="direction-panel" id="left-panel">← Lewo</div>
-                        <div class="direction-panel" id="right-panel">Prawo →</div>
-                    </div>
+                <div class="form-group">
+                    <label for="impostor-count">Liczba impostorów (1-5):</label>
+                    <select id="impostor-count">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                    </select>
                 </div>
 
-                <button class="btn" id="confirm-selection-btn" onclick="confirmStartingPlayer()" style="display: none;">Potwierdź wybór</button>
+                <div class="form-group">
+                    <label>Imiona graczy (opcjonalnie):</label>
+                    <div id="player-inputs" class="players-list"></div>
+                </div>
+
+                <button class="btn" onclick="backToDeckSelection()">Wróć</button>
+                <button class="btn" onclick="startGame()">Rozpocznij Grę</button>
             </div>
 
-            <div id="game-flow" style="display: none;">
-                <div class="round-info" style="display: block; margin: 20px 0;">
-                    <div id="starting-player"></div>
-                    <div id="direction"></div>
-                </div>
+            <!-- Sekcja gry -->
+            <div id="game-content" style="display: none;">
                 <div style="text-align: center;">
+                    <div id="round-info" class="round-info"></div>
+                </div>
+                <div id="current-player" class="game-info"></div>
+                <div id="password-section" style="position: relative; height: 120px; display: none;">
+                    <div id="password-display" class="password-reveal"></div>
+                </div>
+
+                <div id="player-roulette" style="display: none;">
+                    <div class="roulette-container">
+                        <div class="roulette-wrapper">
+                            <div id="roulette-strip" class="roulette-strip"></div>
+                            <div class="roulette-selector"></div>
+                        </div>
+                    </div>
+
+                    <div id="direction-section" style="display: none; margin-top: 20px;">
+                        <div style="margin-bottom: 20px; font-size: 18px; font-weight: bold; color: #2e5cb8;">Kierunek</div>
+                        <div class="direction-container">
+                            <div class="direction-panel" id="left-panel">← Lewo</div>
+                            <div class="direction-panel" id="right-panel">Prawo →</div>
+                        </div>
+                    </div>
+
+                    <button class="btn" id="confirm-selection-btn" onclick="confirmStartingPlayer()" style="display: none;">Potwierdź wybór</button>
+                </div>
+
+                <!-- Panel podsumowania po losowaniu -->
+                <div id="summary-panel" style="display: none;">
+                    <div class="summary-container">
+                        <div class="summary-header">
+                            <h2>🎯 Podsumowanie rundy</h2>
+                        </div>
+                        <div class="summary-content">
+                            <div class="summary-item">
+                                <div class="summary-label">Zaczyna:</div>
+                                <div id="summary-starting-player" class="summary-value"></div>
+                            </div>
+                            <div class="summary-item">
+                                <div class="summary-label">Kierunek gry:</div>
+                                <div id="summary-direction" class="summary-value"></div>
+                            </div>
+                        </div>
+                        <div class="summary-buttons">
+                            <button class="btn" onclick="showForgotPassword()">Zapomniałem swoje hasło</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Panel wyboru gracza dla przypomnienia hasła -->
+                <div id="forgot-password-panel" style="display: none;">
+                    <div class="summary-container">
+                        <div class="summary-header">
+                            <h2>🤔 Który gracz nie pamięta hasła?</h2>
+                        </div>
+                        <div id="players-selection" class="summary-content" style="gap: 10px;">
+                            <!-- Lista graczy zostanie wygenerowana dynamicznie -->
+                        </div>
+                        <div class="summary-buttons">
+                            <button class="btn" onclick="hideForgotPassword()">Anuluj</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Przyciski pod panelem podsumowania - pozycjonowane absolutnie -->
+                <div id="summary-main-buttons" style="display: none;">
                     <button class="btn" onclick="nextRound()">Następna runda</button>
                     <button class="btn" onclick="resetGame()">Nowa gra</button>
                 </div>
+
+                <div id="game-flow" style="display: none;">
+                    <div class="round-info" style="display: block; margin: 20px 0;">
+                        <div id="starting-player"></div>
+                        <div id="direction"></div>
+                    </div>
+                    <div style="text-align: center;">
+                        <button class="btn" onclick="nextRound()">Następna runda</button>
+                        <button class="btn" onclick="resetGame()">Nowa gra</button>
+                    </div>
+                </div>
             </div>
 
-            <button id="game-action-btn" class="game-action-button hidden" onclick="showPassword()">Pokaż hasło</button>
+            <!-- Przycisk Pokaż hasło - teraz jest w tej samej sekcji co wszystko inne -->
+            <div id="fixed-button-area" style="position: absolute; bottom: 100px; left: 50%; transform: translateX(-50%); width: 300px; text-align: center; z-index: 1000;">
+                <button id="game-btn" class="game-btn" style="display: none; padding: 24px 50px; font-size: 24px; font-weight: bold;" onclick="showPassword()">Pokaż hasło</button>
+            </div>
         </div>
+
     </div>
 
     <script>
@@ -1112,7 +1338,7 @@
         function startGame() {
             const playerCount = parseInt(document.getElementById('player-count').value);
             const impostorCount = parseInt(document.getElementById('impostor-count').value);
-            
+
             players = [];
             gameWords = [];
 
@@ -1126,41 +1352,103 @@
                 gameWords = gameWords.concat(decks[deckName].words);
             });
 
-            // Użyj tej samej animacji co showGameFlow
             const container = document.querySelector('.container');
 
-            // NAJPIERW zmień sekcję i uruchom nextRound (kontener nadal expanded)
-            document.getElementById('player-setup').classList.remove('active');
-            document.getElementById('game-section').classList.add('active');
-            nextRound();
-
-            // POTEM usuń expanded (przycisk płynnie opada razem z kontenerem)
-            setTimeout(() => {
-                container.classList.remove('expanded');
-            }, 100);
-        }
-
-        function nextRound() {
+            // Najpierw przygotuj dane rundy
             currentPassword = gameWords[Math.floor(Math.random() * gameWords.length)];
-            
-            const impostorCount = parseInt(document.getElementById('impostor-count').value);
+
             impostors = [];
             const shuffledPlayers = [...Array(players.length).keys()];
-            
+
             for (let i = shuffledPlayers.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [shuffledPlayers[i], shuffledPlayers[j]] = [shuffledPlayers[j], shuffledPlayers[i]];
             }
-            
+
             for (let i = 0; i < impostorCount; i++) {
                 impostors.push(shuffledPlayers[i]);
             }
 
             currentPlayerIndex = 0;
             playersShownPassword = 0;
-            
+
+            // Ustaw tekst rundy i gracza PRZED pokazaniem paneli
             document.getElementById('round-info').innerHTML = `<h2>Runda ${currentRound}</h2>`;
             const currentPlayerEl = document.getElementById('current-player');
+            currentPlayerEl.innerHTML = players[currentPlayerIndex];
+            currentPlayerEl.className = 'game-info';
+            currentPlayerEl.style.display = 'block';
+            // Wyczyść inline style z poprzedniej rundy
+            currentPlayerEl.style.fontSize = '';
+            currentPlayerEl.style.fontWeight = '';
+            currentPlayerEl.style.color = '';
+            currentPlayerEl.style.margin = '';
+
+            // Reset innych elementów
+            document.getElementById('password-section').style.display = 'none';
+            document.getElementById('game-flow').style.display = 'none';
+
+            // Pokaż przycisk
+            const gameBtn = document.getElementById('game-btn');
+            gameBtn.style.display = 'inline-block';
+
+            // Ukryj konfigurację graczy i pokaż rozgrywkę - BEZ przełączania sekcji
+            document.getElementById('config-content').style.display = 'none';
+            document.getElementById('game-content').style.display = 'block';
+
+            // Natychmiastowa zmiana rozmiaru panelu bez opóźnienia
+            container.classList.remove('expanded');
+
+            // Uruchom animacje paneli
+            requestAnimationFrame(() => {
+                document.getElementById('round-info').classList.add('show');
+                currentPlayerEl.classList.add('show');
+                gameBtn.classList.add('show');
+            });
+        }
+
+        function nextRound() {
+            currentPassword = gameWords[Math.floor(Math.random() * gameWords.length)];
+
+            const impostorCount = parseInt(document.getElementById('impostor-count').value);
+            impostors = [];
+            const shuffledPlayers = [...Array(players.length).keys()];
+
+            for (let i = shuffledPlayers.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffledPlayers[i], shuffledPlayers[j]] = [shuffledPlayers[j], shuffledPlayers[i]];
+            }
+
+            for (let i = 0; i < impostorCount; i++) {
+                impostors.push(shuffledPlayers[i]);
+            }
+
+            currentPlayerIndex = 0;
+            playersShownPassword = 0;
+
+            // Reset animacji z poprzedniej rundy
+            document.getElementById('round-info').classList.remove('show');
+            const currentPlayerEl = document.getElementById('current-player');
+            currentPlayerEl.classList.remove('show');
+            const gameBtn = document.getElementById('game-btn');
+            gameBtn.classList.remove('show');
+
+            // Reset panelu podsumowania
+            document.getElementById('summary-panel').style.display = 'none';
+            document.querySelector('.summary-container').classList.remove('show', 'slide-up');
+            document.getElementById('summary-main-buttons').style.display = 'none';
+            document.getElementById('forgot-password-panel').style.display = 'none';
+
+            // Reset animacji paneli losowania
+            document.querySelector('.roulette-container').classList.remove('scroll-in', 'hide-up');
+            document.getElementById('direction-section').classList.remove('scroll-in', 'hide-up');
+            document.getElementById('player-roulette').classList.remove('scroll-up');
+            document.querySelector('.container').classList.remove('scroll-animation');
+
+            // Reset animacji panelu hasła
+            document.getElementById('password-display').classList.remove('show');
+
+            document.getElementById('round-info').innerHTML = `<h2>Runda ${currentRound}</h2>`;
             // Ustaw panel gracza i przycisk jednocześnie
             currentPlayerEl.innerHTML = players[currentPlayerIndex];
             currentPlayerEl.className = 'game-info'; // Przywróć klasę game-info dla panelu
@@ -1173,21 +1461,27 @@
             document.getElementById('password-section').style.display = 'none';
             document.getElementById('game-flow').style.display = 'none';
 
-            // Pokaż przycisk w tym samym momencie
-            document.getElementById('game-action-btn').classList.remove('hidden');
+            // Pokaż przycisk w tym samym momencie i zresetuj jego stan
+            gameBtn.style.display = 'inline-block';
+            gameBtn.innerHTML = 'Pokaż hasło';
+            gameBtn.onclick = showPassword;
+
+            // Uruchom animacje paneli z krótkimi opóźnieniem
+            requestAnimationFrame(() => {
+                document.getElementById('round-info').classList.add('show');
+                currentPlayerEl.classList.add('show');
+                gameBtn.classList.add('show');
+            });
         }
 
         function showPassword() {
             const isImpostor = impostors.includes(currentPlayerIndex);
             const passwordDisplay = document.getElementById('password-display');
-            const showBtn = document.getElementById('game-action-btn');
+            const showBtn = document.getElementById('game-btn');
             const passwordSection = document.getElementById('password-section');
             const container = document.querySelector('.container');
 
-            // Rozszerz kontener
-            container.classList.add('expanded');
-
-            // Przygotuj zawartość panelu
+            // Przygotuj zawartość panelu PRZED animacją
             if (isImpostor) {
                 passwordDisplay.innerHTML = `
                     <div style="margin-bottom: 15px; font-size: 18px; color: #ffffff; opacity: 0.9;">Rola gracza:</div>
@@ -1200,9 +1494,15 @@
                 `;
             }
 
-            // Pokaż panel z hasłem
+            // Pokaż sekcję hasła i rozpocznij synchroniczne animacje
             passwordSection.style.display = 'block';
-            passwordDisplay.classList.add('show');
+
+            // Użyj requestAnimationFrame aby zapewnić synchronizację
+            requestAnimationFrame(() => {
+                // Jednocześnie: rozszerz kontener i pokaż panel z hasłem
+                container.classList.add('expanded');
+                passwordDisplay.classList.add('show');
+            });
 
             // Zmień przycisk na "OK"
             showBtn.innerHTML = 'OK';
@@ -1215,8 +1515,15 @@
             if (playersShownPassword < players.length) {
                 currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
                 const currentPlayerEl = document.getElementById('current-player');
-                currentPlayerEl.innerHTML = players[currentPlayerIndex];
-                currentPlayerEl.className = 'game-info'; // Upewnij się że ma klasę game-info
+
+                // Animacja zmiany gracza - najpierw ukryj, potem pokaż nowego
+                currentPlayerEl.classList.remove('show');
+
+                setTimeout(() => {
+                    currentPlayerEl.innerHTML = players[currentPlayerIndex];
+                    currentPlayerEl.className = 'game-info'; // Upewnij się że ma klasę game-info
+                    currentPlayerEl.classList.add('show');
+                }, 100);
 
                 // Reset animacji panelu hasła
                 const passwordDisplay = document.getElementById('password-display');
@@ -1227,10 +1534,10 @@
                 container.classList.remove('expanded');
 
                 // Reset przycisku
-                const showBtn = document.getElementById('game-action-btn');
+                const showBtn = document.getElementById('game-btn');
                 showBtn.innerHTML = 'Pokaż hasło';
                 showBtn.onclick = showPassword;
-                showBtn.classList.add('visible');
+                showBtn.style.display = 'inline-block';
                 document.getElementById('password-section').style.display = 'none';
             } else {
                 showGameFlow();
@@ -1240,34 +1547,32 @@
         function showGameFlow() {
             const container = document.querySelector('.container');
 
-            // Animacja zmniejszenia kontenera
-            container.classList.add('changing');
+            // NAJPIERW ustaw przycisk i treść
+            document.getElementById('password-section').style.display = 'none';
 
-            setTimeout(() => {
-                document.getElementById('password-section').style.display = 'none';
-                container.classList.remove('expanded');
+            const currentPlayerEl = document.getElementById('current-player');
+            currentPlayerEl.innerHTML = '🎲 Kto zaczyna?';
+            currentPlayerEl.className = ''; // Usuń klasę game-info żeby nie miał panelu
+            currentPlayerEl.style.display = 'block';
+            currentPlayerEl.style.fontSize = '24px';
+            currentPlayerEl.style.fontWeight = 'bold';
+            // Ustaw kolor zależnie od motywu
+            if (document.body.classList.contains('dark-theme')) {
+                currentPlayerEl.style.color = '#ecf0f1';
+            } else {
+                currentPlayerEl.style.color = '#2c3e50';
+            }
+            currentPlayerEl.style.margin = '20px 0';
+            document.getElementById('game-btn').innerHTML = '🎲 Losuj';
+            document.getElementById('game-btn').onclick = startRoulette;
+            document.getElementById('game-btn').style.display = 'inline-block';
 
-                const currentPlayerEl = document.getElementById('current-player');
-                currentPlayerEl.innerHTML = '🎲 Kto zaczyna?';
-                currentPlayerEl.className = ''; // Usuń klasę game-info żeby nie miał panelu
-                currentPlayerEl.style.display = 'block';
-                currentPlayerEl.style.fontSize = '24px';
-                currentPlayerEl.style.fontWeight = 'bold';
-                // Ustaw kolor zależnie od motywu
-                if (document.body.classList.contains('dark-theme')) {
-                    currentPlayerEl.style.color = '#ecf0f1';
-                } else {
-                    currentPlayerEl.style.color = '#2c3e50';
-                }
-                currentPlayerEl.style.margin = '20px 0';
-                document.getElementById('game-action-btn').innerHTML = '🎲 Losuj';
-                document.getElementById('game-action-btn').onclick = startRoulette;
-                document.getElementById('game-action-btn').classList.remove('hidden');
+            // Natychmiastowa zmiana rozmiaru panelu bez opóźnienia
+            container.classList.remove('expanded');
 
-                setTimeout(() => {
-                    container.classList.remove('changing');
-                }, 50);
-            }, 150);
+            // Ukryj panele losowania do momentu kliknięcia "Losuj"
+            document.getElementById('player-roulette').style.display = 'none';
+            document.getElementById('direction-section').style.display = 'none';
         }
 
         let selectedStartingPlayer = null;
@@ -1292,7 +1597,16 @@
         }
 
         function startRoulette() {
-            document.getElementById('game-action-btn').classList.add('hidden');
+            const gameBtn = document.getElementById('game-btn');
+            const container = document.querySelector('.container');
+
+            // Ukryj przycisk
+            gameBtn.style.display = 'none';
+
+            // Płynnie powiększ główny kontener gry podczas losowania
+            container.classList.add('expanded');
+
+            // Pokaż panele losowania
             document.getElementById('player-roulette').style.display = 'block';
             document.getElementById('direction-section').style.display = 'block';
 
@@ -1304,10 +1618,19 @@
 
             createRouletteStrip();
 
+            // Uruchom animacje paneli losowania
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    document.querySelector('.roulette-container').classList.add('scroll-in');
+                    document.getElementById('direction-section').classList.add('scroll-in');
+                });
+            });
+
             setTimeout(() => {
                 spinRoulette();
-            }, 500);
+            }, 800);
         }
+
 
         function createRouletteStrip() {
             const strip = document.getElementById('roulette-strip');
@@ -1477,21 +1800,60 @@
             const direction = selectedDirection === 'left' ? 'lewo' : 'prawo';
             const directionArrow = direction === 'prawo' ? '→' : '←';
 
+            // Wypełnij dane podsumowania
+            document.getElementById('summary-starting-player').innerHTML = `${players[selectedStartingPlayer]}`;
+            document.getElementById('summary-direction').innerHTML = `${direction} <span class="direction-arrow">${directionArrow}</span>`;
 
+            // Nie ukrywaj panelu gracza - zachowaj go podczas animacji
+            // document.getElementById('current-player').style.display = 'none';
+
+            // Dodaj overflow hidden do kontenera dla efektu scroll
+            const container = document.querySelector('.container');
+
+            // Natychmiast przygotuj oba panele do crossfade
+            const summaryPanel = document.getElementById('summary-panel');
+            const summaryContainer = document.querySelector('.summary-container');
+            const playerRoulette = document.getElementById('player-roulette');
+
+            // Panel podsumowania zaczyna z dołu, ale już widoczny
+            summaryPanel.style.display = 'block';
+            summaryContainer.classList.add('slide-up');
+
+            // Wymusz repaint żeby CSS transition zadziałał w pierwszej rundzie
+            summaryContainer.offsetHeight;
+
+            // NATYCHMIAST rozpocznij obie animacje jednocześnie
+            // OPÓŹNIONA zmiana rozmiaru kontenera - poczekaj na animację
+            container.classList.add('scroll-animation');
+
+            requestAnimationFrame(() => {
+                // JEDNOCZESNE animacje bez opóźnienia
+                container.classList.remove('expanded'); // Zmień rozmiar kontenera w tym samym czasie
+                playerRoulette.classList.add('scroll-up');
+                summaryContainer.classList.remove('slide-up');
+            });
+
+            // Zsynchronizuj z krótszą animacją paneli (500ms)
+            setTimeout(() => {
+                document.getElementById('player-roulette').style.display = 'none';
+                document.getElementById('current-player').style.display = 'none';
+                container.classList.remove('scroll-animation');
+                document.getElementById('summary-main-buttons').style.display = 'block';
+            }, 500);
+
+            // Stare elementy dla kompatybilności (ukryte)
             document.getElementById('starting-player').innerHTML = `
                 <strong>Zaczyna:</strong> ${players[selectedStartingPlayer]}
             `;
             document.getElementById('direction').innerHTML = `
                 <strong>Kierunek gry:</strong> ${direction} <span class="direction-arrow">${directionArrow}</span>
             `;
-            
-            document.getElementById('current-player').style.display = 'none';
-            document.getElementById('player-roulette').style.display = 'none';
-            document.getElementById('game-flow').style.display = 'block';
+            document.getElementById('game-flow').style.display = 'none';
             
             // Reset dla następnej rundy
-            document.getElementById('game-action-btn').innerHTML = 'Pokaż hasło';
-            document.getElementById('game-action-btn').onclick = showPassword;
+            const gameBtn = document.getElementById('game-btn');
+            gameBtn.innerHTML = 'Pokaż hasło';
+            gameBtn.onclick = showPassword;
             document.getElementById('confirm-selection-btn').style.display = 'none';
             
             // Kompletny reset ruletki
@@ -1512,17 +1874,197 @@
             currentRound++;
         }
 
+        function showForgotPassword() {
+            // Płynne ukrycie panelu podsumowania
+            const summaryPanel = document.getElementById('summary-panel');
+            const forgotPanel = document.getElementById('forgot-password-panel');
+            const mainButtons = document.getElementById('summary-main-buttons');
+            const container = document.querySelector('.container');
+
+            // Jednocześnie: ukryj panele i rozszerz kontener
+            summaryPanel.style.opacity = '0';
+            mainButtons.style.opacity = '0';
+            container.classList.add('expanded');
+
+            setTimeout(() => {
+                summaryPanel.style.display = 'none';
+                mainButtons.style.display = 'none';
+
+                // Wygeneruj listę graczy
+                const playersSelection = document.getElementById('players-selection');
+                playersSelection.innerHTML = '';
+
+                players.forEach((playerName, index) => {
+                    const playerButton = document.createElement('button');
+                    playerButton.className = 'btn';
+                    playerButton.style.margin = '5px';
+                    playerButton.textContent = playerName;
+                    playerButton.onclick = () => remindPlayerPassword(index);
+                    playersSelection.appendChild(playerButton);
+                });
+
+                // Pokaż panel wyboru gracza z animacją
+                forgotPanel.style.display = 'block';
+                forgotPanel.style.opacity = '0';
+
+                requestAnimationFrame(() => {
+                    forgotPanel.style.opacity = '1';
+                });
+            }, 300);
+        }
+
+        function hideForgotPassword() {
+            // Płynne ukrycie panelu wyboru gracza
+            const forgotPanel = document.getElementById('forgot-password-panel');
+            const summaryPanel = document.getElementById('summary-panel');
+            const mainButtons = document.getElementById('summary-main-buttons');
+            const container = document.querySelector('.container');
+
+            // Jednocześnie: ukryj panel i zmniejsz kontener
+            forgotPanel.style.opacity = '0';
+            container.classList.remove('expanded');
+
+            setTimeout(() => {
+                forgotPanel.style.display = 'none';
+
+                // Pokaż panel podsumowania z animacją
+                summaryPanel.style.display = 'block';
+                mainButtons.style.display = 'block';
+                summaryPanel.style.opacity = '0';
+                mainButtons.style.opacity = '0';
+
+                requestAnimationFrame(() => {
+                    summaryPanel.style.opacity = '1';
+                    mainButtons.style.opacity = '1';
+                });
+            }, 300);
+        }
+
+        function remindPlayerPassword(playerIndex) {
+            // Użyj tego samego systemu co w normalnej rozgrywce
+            const forgotPanel = document.getElementById('forgot-password-panel');
+            const container = document.querySelector('.container');
+
+            forgotPanel.style.opacity = '0';
+
+            setTimeout(() => {
+                // Ukryj panel wyboru gracza
+                forgotPanel.style.display = 'none';
+
+                // TERAZ zmniejsz kontener (po ukryciu panelu)
+                container.classList.remove('expanded');
+
+                // Pokaż panel gracza jak w normalnej rozgrywce
+                const currentPlayerEl = document.getElementById('current-player');
+                currentPlayerEl.innerHTML = players[playerIndex];
+                currentPlayerEl.className = 'game-info';
+                currentPlayerEl.style.display = 'block';
+                currentPlayerEl.style.fontSize = '';
+                currentPlayerEl.style.fontWeight = '';
+                currentPlayerEl.style.color = '';
+                currentPlayerEl.style.margin = '';
+
+                // Reset sekcji hasła
+                document.getElementById('password-section').style.display = 'none';
+                document.getElementById('password-display').classList.remove('show');
+
+                // Pokaż przycisk "Pokaż hasło"
+                const gameBtn = document.getElementById('game-btn');
+                gameBtn.style.display = 'inline-block';
+                gameBtn.innerHTML = 'Pokaż hasło';
+                gameBtn.onclick = () => showPasswordForReminder(playerIndex);
+
+                // Uruchom animacje paneli (po krótkiej przerwie na zmianę rozmiaru kontenera)
+                setTimeout(() => {
+                    currentPlayerEl.classList.add('show');
+                    gameBtn.classList.add('show');
+                }, 50);
+            }, 300);
+        }
+
+        function showPasswordForReminder(playerIndex) {
+            // Użyj tego samego systemu co w normalnej rozgrywce
+            const isImpostor = impostors.includes(playerIndex);
+            const passwordDisplay = document.getElementById('password-display');
+            const passwordSection = document.getElementById('password-section');
+            const container = document.querySelector('.container');
+
+            // Przygotuj zawartość panelu hasła
+            if (isImpostor) {
+                passwordDisplay.innerHTML = `
+                    <div style="margin-bottom: 15px; font-size: 18px; color: #ffffff; opacity: 0.9;">Rola gracza:</div>
+                    <div style="font-size: 28px; font-weight: bold; color: #ffffff; text-shadow: 2px 2px 4px rgba(231, 76, 60, 0.8);">😈 Jesteś impostorem!</div>
+                `;
+            } else {
+                passwordDisplay.innerHTML = `
+                    <div style="margin-bottom: 15px; font-size: 18px;">Twoje hasło to:</div>
+                    <div style="font-size: 28px; font-weight: bold;">${currentPassword}</div>
+                `;
+            }
+
+            // Pokaż sekcję hasła i rozpocznij animacje
+            passwordSection.style.display = 'block';
+
+            requestAnimationFrame(() => {
+                container.classList.add('expanded');
+                passwordDisplay.classList.add('show');
+            });
+
+            // Zmień przycisk na "OK"
+            const gameBtn = document.getElementById('game-btn');
+            gameBtn.innerHTML = 'OK';
+            gameBtn.onclick = returnToSummaryFromReminder;
+        }
+
+        function returnToSummaryFromReminder() {
+            // Użyj tego samego systemu co w normalnej rozgrywce
+            const currentPlayerEl = document.getElementById('current-player');
+            const passwordDisplay = document.getElementById('password-display');
+            const passwordSection = document.getElementById('password-section');
+            const container = document.querySelector('.container');
+            const gameBtn = document.getElementById('game-btn');
+
+            // Ukryj animacje
+            currentPlayerEl.classList.remove('show');
+            passwordDisplay.classList.remove('show');
+            gameBtn.classList.remove('show');
+
+            // Reset animacji kontenera
+            container.classList.remove('expanded');
+
+            setTimeout(() => {
+                // Ukryj elementy
+                currentPlayerEl.style.display = 'none';
+                passwordSection.style.display = 'none';
+                gameBtn.style.display = 'none';
+
+                // Wróć do panelu podsumowania z płynną animacją
+                const summaryPanel = document.getElementById('summary-panel');
+                const mainButtons = document.getElementById('summary-main-buttons');
+
+                summaryPanel.style.display = 'block';
+                mainButtons.style.display = 'block';
+                summaryPanel.style.opacity = '0';
+                mainButtons.style.opacity = '0';
+
+                requestAnimationFrame(() => {
+                    summaryPanel.style.opacity = '1';
+                    mainButtons.style.opacity = '1';
+                });
+            }, 300);
+        }
+
         function resetGame() {
             currentRound = 1;
             selectedDecks = [];
             players = [];
             gameWords = [];
             impostors = [];
-            
+
             document.querySelectorAll('.deck-card').forEach(card => {
                 card.classList.remove('selected');
             });
-            
+
             // Reset ruletki
             const strip = document.getElementById('roulette-strip');
             if (strip) {
@@ -1532,7 +2074,7 @@
             }
             document.getElementById('player-roulette').style.display = 'none';
             document.getElementById('confirm-selection-btn').style.display = 'none';
-            
+
             // Reset paneli kierunku
             document.getElementById('direction-section').style.display = 'none';
             const leftPanel = document.getElementById('left-panel');
@@ -1543,8 +2085,24 @@
                 leftPanel.style.opacity = '1';
                 rightPanel.style.opacity = '1';
             }
-            
-            changeSection('game-section', 'deck-selection');
+
+            // Reset panelu podsumowania
+            document.getElementById('summary-panel').style.display = 'none';
+            document.querySelector('.summary-container').classList.remove('show', 'slide-up');
+            document.getElementById('summary-main-buttons').style.display = 'none';
+            document.getElementById('forgot-password-panel').style.display = 'none';
+
+            // Reset animacji paneli losowania
+            document.querySelector('.roulette-container').classList.remove('scroll-in', 'hide-up');
+            document.getElementById('direction-section').classList.remove('scroll-in', 'hide-up');
+            document.getElementById('player-roulette').classList.remove('scroll-up');
+            document.querySelector('.container').classList.remove('scroll-animation');
+
+            // Pokaż konfigurację graczy i ukryj rozgrywkę
+            document.getElementById('game-content').style.display = 'none';
+            document.getElementById('config-content').style.display = 'block';
+
+            changeSection('player-setup', 'deck-selection');
         }
 
         document.querySelectorAll('.deck-card').forEach(card => {
